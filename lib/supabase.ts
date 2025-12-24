@@ -1,6 +1,34 @@
 import { createClient } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
+import { Platform } from 'react-native';
+
+// Custom storage wrapper to handle SSR (Server Side Rendering) in Expo Web
+const CustomStorage = {
+  getItem: async (key: string) => {
+    if (Platform.OS === 'web') {
+      if (typeof window === 'undefined') return null;
+      return window.localStorage.getItem(key);
+    }
+    return AsyncStorage.getItem(key);
+  },
+  setItem: async (key: string, value: string) => {
+    if (Platform.OS === 'web') {
+      if (typeof window === 'undefined') return;
+      window.localStorage.setItem(key, value);
+    } else {
+      await AsyncStorage.setItem(key, value);
+    }
+  },
+  removeItem: async (key: string) => {
+    if (Platform.OS === 'web') {
+      if (typeof window === 'undefined') return;
+      window.localStorage.removeItem(key);
+    } else {
+      await AsyncStorage.removeItem(key);
+    }
+  },
+};
 
 // Prefer values passed via Expo config `extra` (reliable in runtime), fallback to process.env.
 const extra =
@@ -22,7 +50,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    storage: AsyncStorage,
+    storage: CustomStorage,
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,
