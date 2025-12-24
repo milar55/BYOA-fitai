@@ -12,7 +12,14 @@ export default function WelcomeScreen() {
   const router = useRouter();
 
   return (
-    <View className="flex-1 bg-white">
+    <View
+      className="flex-1 bg-white"
+      onTouchStart={() => {
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H1',location:'app/(auth)/welcome.tsx:root',message:'Root onTouchStart',data:{},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
+      }}
+    >
       <StatusBar style="dark" />
       
       {/* Hero Section with Gradient Background */}
@@ -46,7 +53,14 @@ export default function WelcomeScreen() {
       </View>
 
       {/* Action Section */}
-      <View className="flex-1 p-8 justify-between">
+      <View
+        className="flex-1 p-8 justify-between"
+        onTouchStart={() => {
+          // #region agent log
+          fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H1',location:'app/(auth)/welcome.tsx:actionSection',message:'Action section onTouchStart',data:{},timestamp:Date.now()})}).catch(()=>{});
+          // #endregion
+        }}
+      >
         <Animated.View 
           entering={FadeInUp.delay(400).duration(800)}
           className="mt-4"
@@ -65,13 +79,23 @@ export default function WelcomeScreen() {
         >
           <Button
             title="Get Started"
-            onPress={() => router.push('/(auth)/signup')}
+            onPress={() => {
+              // #region agent log
+              fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H4',location:'app/(auth)/welcome.tsx:getStarted',message:'Get Started handler called',data:{to:'/(auth)/signup'},timestamp:Date.now()})}).catch(()=>{});
+              // #endregion
+              router.push('/(auth)/signup');
+            }}
             className="w-full"
           />
           <Button
             title="Sign In"
-            variant="ghost"
-            onPress={() => router.push('/(auth)/login')}
+            variant="outline"
+            onPress={() => {
+              // #region agent log
+              fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H4',location:'app/(auth)/welcome.tsx:signIn',message:'Sign In handler called',data:{to:'/(auth)/login'},timestamp:Date.now()})}).catch(()=>{});
+              // #endregion
+              router.push('/(auth)/login');
+            }}
             className="w-full"
           />
         </Animated.View>

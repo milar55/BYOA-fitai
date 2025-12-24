@@ -16,6 +16,26 @@ import { StatusBar } from 'expo-status-bar';
 import Animated, { FadeInUp, FadeInRight } from 'react-native-reanimated';
 import { Card } from '@/components/ui/Card';
 
+const GoalInput = ({ label, value, onChange, unit, delay }: any) => (
+  <Animated.View entering={FadeInRight.delay(delay).duration(600)}>
+    <Card className="flex-row items-center justify-between p-4 mb-4">
+      <View>
+        <Text className="text-deepTeal text-lg font-poppins-semibold">{label}</Text>
+        <Text className="text-deepTeal/40 text-xs font-poppins uppercase tracking-widest">Target per day</Text>
+      </View>
+      <View className="flex-row items-center">
+        <TextInput
+          value={value}
+          onChangeText={onChange}
+          keyboardType="numeric"
+          className="text-2xl font-poppins-bold text-saffron mr-2 w-16 text-right"
+        />
+        <Text className="text-deepTeal/60 font-poppins-semibold">{unit}</Text>
+      </View>
+    </Card>
+  </Animated.View>
+);
+
 export default function SetupGoalsScreen() {
   const router = useRouter();
   const [calories, setCalories] = useState('2000');
@@ -54,26 +74,6 @@ export default function SetupGoalsScreen() {
       router.replace('/(tabs)');
     }
   };
-
-  const GoalInput = ({ label, value, onChange, unit, delay }: any) => (
-    <Animated.View entering={FadeInRight.delay(delay).duration(600)}>
-      <Card className="flex-row items-center justify-between p-4 mb-4">
-        <View>
-          <Text className="text-deepTeal text-lg font-poppins-semibold">{label}</Text>
-          <Text className="text-deepTeal/40 text-xs font-poppins uppercase tracking-widest">Target per day</Text>
-        </View>
-        <View className="flex-row items-center">
-          <TextInput
-            value={value}
-            onChangeText={onChange}
-            keyboardType="numeric"
-            className="text-2xl font-poppins-bold text-saffron mr-2 w-16 text-right"
-          />
-          <Text className="text-deepTeal/60 font-poppins-semibold">{unit}</Text>
-        </View>
-      </Card>
-    </Animated.View>
-  );
 
   return (
     <SafeAreaView className="flex-1 bg-white">

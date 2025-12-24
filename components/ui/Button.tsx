@@ -1,4 +1,4 @@
-import { Text, TouchableOpacity, ActivityIndicator, View } from 'react-native';
+import { Text, Pressable, ActivityIndicator, View } from 'react-native';
 import React from 'react';
 
 interface ButtonProps {
@@ -46,10 +46,30 @@ export const Button = ({
   };
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.8}
-      onPress={onPress}
+    <Pressable
+      onPress={() => {
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H2',location:'components/ui/Button.tsx:onPress',message:'Button onPress fired',data:{title,variant,disabled,loading},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
+        onPress();
+      }}
+      onPressIn={() => {
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H1',location:'components/ui/Button.tsx:onPressIn',message:'Button press in',data:{title,variant},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
+      }}
+      onPressOut={() => {
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H1',location:'components/ui/Button.tsx:onPressOut',message:'Button press out',data:{title,variant},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
+      }}
       disabled={disabled || loading}
+      style={({ pressed }) => [
+        { 
+          opacity: pressed ? 0.7 : 1.0,
+          transform: [{ scale: pressed ? 0.98 : 1.0 }]
+        }
+      ]}
       className={`
         flex-row items-center justify-center px-6 py-4 rounded-2xl
         ${getVariantStyles()}
@@ -72,7 +92,7 @@ export const Button = ({
           </Text>
         </View>
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 
