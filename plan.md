@@ -320,11 +320,13 @@ Create Supabase tables with RLS policies
 - [ ] Pull-to-refresh functionality
 - [ ] Animated progress updates
 
+
 #### 3.2 Camera & Photo Integration
 - [ ] Implement camera capture view:
   - Native camera interface with preview
   - Flash toggle and camera flip
   - Shutter button with haptic feedback
+- [ ] App should open to the Log a Meal/camera function as the first screen for the user. 
 - [ ] Add photo picker option (for existing photos)
 - [ ] Image compression before upload
 - [ ] Upload to Supabase Storage

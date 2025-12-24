@@ -59,13 +59,13 @@ export default function SetupGoalsScreen() {
 
     const { error } = await supabase
       .from('profiles')
-      .update({
+      .upsert({
+        id: user.id,
         daily_calorie_goal: parseInt(calories),
         protein_goal_g: parseInt(protein),
         carbs_goal_g: parseInt(carbs),
         fat_goal_g: parseInt(fat),
-      })
-      .eq('id', user.id);
+      }, { onConflict: 'id' });
 
     if (error) {
       setError(error.message);

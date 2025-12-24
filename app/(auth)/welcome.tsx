@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, SafeAreaView, Dimensions } from 'react-native';
+import { View, Text, Image, SafeAreaView, Dimensions, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Button } from '@/components/ui/Button';
 import { StatusBar } from 'expo-status-bar';
@@ -18,12 +18,13 @@ export default function WelcomeScreen() {
         // #region agent log
         fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H1',location:'app/(auth)/welcome.tsx:root',message:'Root onTouchStart',data:{},timestamp:Date.now()})}).catch(()=>{});
         // #endregion
+        console.log('[DBG_WELCOME] root onTouchStart');
       }}
     >
       <StatusBar style="dark" />
       
       {/* Hero Section with Gradient Background */}
-      <View className="h-[60%] w-full overflow-hidden rounded-b-[48px]">
+      <View className="h-[60%] w-full overflow-hidden rounded-b-[48px]" pointerEvents="box-none">
         <LinearGradient
           colors={['#FF9933', '#FFC107', '#00BFA5']}
           className="absolute inset-0"
@@ -55,10 +56,12 @@ export default function WelcomeScreen() {
       {/* Action Section */}
       <View
         className="flex-1 p-8 justify-between"
+        pointerEvents="box-none"
         onTouchStart={() => {
           // #region agent log
           fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H1',location:'app/(auth)/welcome.tsx:actionSection',message:'Action section onTouchStart',data:{},timestamp:Date.now()})}).catch(()=>{});
           // #endregion
+          console.log('[DBG_WELCOME] action section onTouchStart');
         }}
       >
         <Animated.View 
@@ -76,6 +79,13 @@ export default function WelcomeScreen() {
         <Animated.View 
           entering={FadeInDown.delay(600).duration(800)}
           className="gap-y-4 mb-4"
+          onStartShouldSetResponder={() => {
+            // #region agent log
+            fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H3',location:'app/(auth)/welcome.tsx:buttonsContainer',message:'buttons container startShouldSetResponder',data:{},timestamp:Date.now()})}).catch(()=>{});
+            // #endregion
+            console.log('[DBG_WELCOME] buttons container startShouldSetResponder');
+            return false;
+          }}
         >
           <Button
             title="Get Started"
@@ -83,21 +93,41 @@ export default function WelcomeScreen() {
               // #region agent log
               fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H4',location:'app/(auth)/welcome.tsx:getStarted',message:'Get Started handler called',data:{to:'/(auth)/signup'},timestamp:Date.now()})}).catch(()=>{});
               // #endregion
+              console.log('[DBG_WELCOME] Get Started handler -> /(auth)/signup');
               router.push('/(auth)/signup');
             }}
             className="w-full"
           />
-          <Button
-            title="Sign In"
-            variant="outline"
-            onPress={() => {
+          <View
+            pointerEvents="box-none"
+            onStartShouldSetResponder={() => {
               // #region agent log
-              fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H4',location:'app/(auth)/welcome.tsx:signIn',message:'Sign In handler called',data:{to:'/(auth)/login'},timestamp:Date.now()})}).catch(()=>{});
+              fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H1',location:'app/(auth)/welcome.tsx:signInWrapper',message:'Sign In wrapper startShouldSetResponder',data:{},timestamp:Date.now()})}).catch(()=>{});
               // #endregion
-              router.push('/(auth)/login');
+              console.log('[DBG_WELCOME] Sign In wrapper startShouldSetResponder');
+              return false;
             }}
-            className="w-full"
-          />
+            onTouchStart={() => {
+              // #region agent log
+              fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H1',location:'app/(auth)/welcome.tsx:signInWrapper',message:'Sign In wrapper onTouchStart',data:{},timestamp:Date.now()})}).catch(()=>{});
+              // #endregion
+              console.log('[DBG_WELCOME] Sign In wrapper onTouchStart');
+            }}
+          >
+            <Button
+              title="Sign In"
+              variant="outline"
+              onPress={() => {
+                // #region agent log
+                fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H4',location:'app/(auth)/welcome.tsx:signIn',message:'Sign In handler called',data:{to:'/(auth)/login'},timestamp:Date.now()})}).catch(()=>{});
+                // #endregion
+                console.log('[DBG_WELCOME] Sign In handler -> /(auth)/login');
+                Alert.alert('Debug', 'Sign In onPress fired');
+                router.push('/(auth)/login');
+              }}
+              className="w-full"
+            />
+          </View>
         </Animated.View>
       </View>
     </View>
