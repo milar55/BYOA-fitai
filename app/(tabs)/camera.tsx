@@ -1,8 +1,16 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, SafeAreaView, Text, View, Vibration } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  SafeAreaView,
+  Text,
+  Vibration,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -17,6 +25,7 @@ export default function CameraTabScreen() {
   const router = useRouter();
   const { userId } = useAuthUser();
   const [permission, requestPermission] = useCameraPermissions();
+  const window = useWindowDimensions();
 
   const cameraRef = useRef<CameraView>(null);
   const [facing, setFacing] = useState<Facing>('back');
@@ -135,12 +144,30 @@ export default function CameraTabScreen() {
   }
 
   return (
-    <View className="flex-1 bg-black">
+    <View
+      className="flex-1 bg-black"
+      onLayout={(e) => {
+        const { width, height } = e.nativeEvent.layout;
+        console.log('[DBG_CAMERA_LAYOUT] root onLayout', {
+          width,
+          height,
+          windowW: window.width,
+          windowH: window.height,
+        });
+      }}
+    >
       <CameraView
         ref={cameraRef}
+        // NativeWind `className` isn't reliably applied to `CameraView` on iOS.
+        // Force full-height layout via style.
+        style={{ flex: 1 }}
         className="flex-1"
         facing={facing}
         flash={flash}
+        onLayout={(e) => {
+          const { width, height } = e.nativeEvent.layout;
+          console.log('[DBG_CAMERA_LAYOUT] CameraView onLayout', { width, height, facing, flash });
+        }}
       >
         {/* Top controls */}
         <SafeAreaView className="px-4 pt-2">

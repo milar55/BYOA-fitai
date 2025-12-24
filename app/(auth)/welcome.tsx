@@ -24,7 +24,10 @@ export default function WelcomeScreen() {
       <StatusBar style="dark" />
       
       {/* Hero Section with Gradient Background */}
-      <View className="h-[60%] w-full overflow-hidden rounded-b-[48px]" pointerEvents="box-none">
+      <View
+        className="h-[60%] w-full overflow-hidden rounded-b-[48px]"
+        style={{ pointerEvents: 'box-none' }}
+      >
         <LinearGradient
           colors={['#FF9933', '#FFC107', '#00BFA5']}
           className="absolute inset-0"
@@ -56,7 +59,7 @@ export default function WelcomeScreen() {
       {/* Action Section */}
       <View
         className="flex-1 p-8 justify-between"
-        pointerEvents="box-none"
+        style={{ pointerEvents: 'box-none' }}
         onTouchStart={() => {
           // #region agent log
           fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H1',location:'app/(auth)/welcome.tsx:actionSection',message:'Action section onTouchStart',data:{},timestamp:Date.now()})}).catch(()=>{});
@@ -99,7 +102,7 @@ export default function WelcomeScreen() {
             className="w-full"
           />
           <View
-            pointerEvents="box-none"
+            style={{ pointerEvents: 'box-none' }}
             onStartShouldSetResponder={() => {
               // #region agent log
               fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H1',location:'app/(auth)/welcome.tsx:signInWrapper',message:'Sign In wrapper startShouldSetResponder',data:{},timestamp:Date.now()})}).catch(()=>{});
