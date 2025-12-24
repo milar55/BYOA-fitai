@@ -61,6 +61,7 @@ export default function SetupGoalsScreen() {
       .from('profiles')
       .upsert({
         id: user.id,
+        email: user.email,
         daily_calorie_goal: parseInt(calories),
         protein_goal_g: parseInt(protein),
         carbs_goal_g: parseInt(carbs),

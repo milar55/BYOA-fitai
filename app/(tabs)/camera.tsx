@@ -99,6 +99,15 @@ export default function CameraTabScreen() {
       const { publicUrl } = await uploadMealPhoto({ uri: capturedUri, userId });
       setUploadUrl(publicUrl);
       Vibration.vibrate(18);
+      
+      // Navigate to log-meal screen with the local URI and public URL
+      router.push({
+        pathname: '/log-meal',
+        params: { 
+          imageUri: capturedUri,
+          imageUrl: publicUrl 
+        }
+      });
     } catch (e: any) {
       Alert.alert(
         'Upload failed',
