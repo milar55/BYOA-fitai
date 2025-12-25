@@ -48,22 +48,13 @@ export const Button = ({
   return (
     <Pressable
       onPress={() => {
-        // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H2',location:'components/ui/Button.tsx:onPress',message:'Button onPress fired',data:{title,variant,disabled,loading},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
         console.log(`[DBG_BUTTON] onPress title="${title}" variant="${variant}" disabled=${disabled} loading=${loading}`);
         onPress();
       }}
       onPressIn={() => {
-        // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H1',location:'components/ui/Button.tsx:onPressIn',message:'Button press in',data:{title,variant},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
         console.log(`[DBG_BUTTON] onPressIn title="${title}" variant="${variant}"`);
       }}
       onPressOut={() => {
-        // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H1',location:'components/ui/Button.tsx:onPressOut',message:'Button press out',data:{title,variant},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
         console.log(`[DBG_BUTTON] onPressOut title="${title}" variant="${variant}"`);
       }}
       disabled={disabled || loading}

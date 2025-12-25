@@ -7,6 +7,7 @@ import {
   Alert,
   SafeAreaView,
   Text,
+  TouchableOpacity,
   Vibration,
   View,
   useWindowDimensions,
@@ -23,6 +24,7 @@ type Flash = 'off' | 'on';
 
 export default function CameraTabScreen() {
   const router = useRouter();
+  
   const { userId } = useAuthUser();
   const [permission, requestPermission] = useCameraPermissions();
   const window = useWindowDimensions();
@@ -101,13 +103,23 @@ export default function CameraTabScreen() {
       Vibration.vibrate(18);
       
       // Navigate to log-meal screen with the local URI and public URL
-      router.push({
-        pathname: '/log-meal',
-        params: { 
-          imageUri: capturedUri,
-          imageUrl: publicUrl 
-        }
-      });
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'navctx-1',hypothesisId:'H1',location:'app/(tabs)/camera.tsx:upload',message:'About to router.push to log-meal',data:{hasRouter:!!router,hasUserId:!!userId,hasCapturedUri:!!capturedUri,hasPublicUrl:!!publicUrl,path:'/(tabs)/log-meal'},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
+      try {
+        router.push({
+          pathname: '/(tabs)/log-meal',
+          params: {
+            imageUri: capturedUri,
+            imageUrl: publicUrl,
+          },
+        });
+      } catch (navErr: any) {
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'navctx-1',hypothesisId:'H1',location:'app/(tabs)/camera.tsx:upload',message:'router.push threw',data:{errMessage:navErr?.message ?? String(navErr)},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
+        throw navErr;
+      }
     } catch (e: any) {
       Alert.alert(
         'Upload failed',
@@ -214,19 +226,27 @@ export default function CameraTabScreen() {
                 />
 
                 <View className="items-center">
-                  <View className="w-20 h-20 rounded-full border-4 border-white/80 items-center justify-center">
-                    <View className="w-16 h-16 rounded-full bg-white/95" />
-                  </View>
+                  <TouchableOpacity 
+                    onPress={() => {
+                      if (capturedUri) {
+                        setCapturedUri(null);
+                        setUploadUrl(null);
+                      } else {
+                        takePhoto();
+                      }
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <View className="w-20 h-20 rounded-full border-4 border-white/80 items-center justify-center">
+                      <View className={`w-16 h-16 rounded-full ${capturedUri ? 'bg-chilliRed' : 'bg-white/95'}`} />
+                    </View>
+                  </TouchableOpacity>
                   <Text className="text-white/70 font-inter text-xs mt-2">
-                    Tap below to capture
+                    {capturedUri ? 'Tap to retake' : 'Tap to capture'}
                   </Text>
                 </View>
 
-                <Button
-                  title={capturedUri ? 'Retake' : 'Capture'}
-                  onPress={capturedUri ? () => setCapturedUri(null) : takePhoto}
-                  className="px-5 py-3"
-                />
+                <View className="w-[80px]" /> 
               </View>
 
               {capturedUri && (
