@@ -20,15 +20,6 @@ export async function describeMeal(
   imageUrl?: string
 ): Promise<{ description: string; confidence: number }> {
   try {
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'desc-2',hypothesisId:'H1',location:'lib/gemini.ts:describeMeal',message:'describeMeal entered',data:{platform:require('react-native').Platform.OS,hasEncodingType:!!(FileSystem as any)?.EncodingType,hasImageUrl:!!imageUrl},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
-    console.log('[DBG_AI_DESC] describeMeal entered', {
-      platform: require('react-native').Platform.OS,
-      hasEncodingType: !!(FileSystem as any)?.EncodingType,
-      hasImageUrl: !!imageUrl,
-    });
-
     // Call Supabase Edge Function for AI description.
     // Prefer passing the public URL so the server can fetch/encode.
     const body: Record<string, unknown> = imageUrl
@@ -36,15 +27,11 @@ export async function describeMeal(
       : (() => {
           // Fallback: local base64 (avoid FileSystem.EncodingType.Base64 which is undefined on some runtimes)
           // NOTE: this fallback isn't expected to run when called after upload.
-          console.log('[DBG_AI_DESC] fallback to local base64 (no imageUrl)');
           return { imageBase64: '__will_be_replaced__', mealType };
         })();
 
     if (!imageUrl) {
       // Convert image to base64 using string literal encoding
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'desc-2',hypothesisId:'H2',location:'lib/gemini.ts:describeMeal',message:'Converting local uri to base64 (fallback)',data:{uriPrefix:String(imageUri).slice(0,40)},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       const base64 = await FileSystem.readAsStringAsync(imageUri, {
         // @ts-expect-error legacy API supports string encoding
         encoding: 'base64',
@@ -58,6 +45,18 @@ export async function describeMeal(
     });
 
     if (error) {
+      // Supabase functions surface non-2xx as an error. If we got quota (429),
+      // bubble a clear message to the UI.
+      const msg = String((error as any)?.message ?? '');
+      const isQuota =
+        msg.includes('429') ||
+        msg.toLowerCase().includes('resource_exhausted') ||
+        msg.toLowerCase().includes('quota');
+
+      if (isQuota) {
+        throw new Error('AI is temporarily rate-limited (quota exceeded). Please try again in a minute.');
+      }
+
       console.error('Error invoking describe-meal function:', error);
       throw new Error('Failed to generate AI meal description. Please try again.');
     }

@@ -38,7 +38,6 @@ export default function ProfileScreen() {
             title="Log out"
             variant="outline"
             onPress={async () => {
-              console.log('[DBG_PROFILE] logout pressed');
               await supabase.auth.signOut();
             }}
           />

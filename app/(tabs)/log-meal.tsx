@@ -39,9 +39,6 @@ export default function LogMealScreen() {
 
   const onSelectMealType = useCallback(
     (type: MealType) => {
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'navctx-1',hypothesisId:'H2',location:'app/(tabs)/log-meal.tsx:onSelectMealType',message:'Meal type selected',data:{type,hasRouter:!!router},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       setMealType(type);
     },
     [router]
@@ -52,11 +49,6 @@ export default function LogMealScreen() {
 
     setGenerating(true);
     try {
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'desc-2',hypothesisId:'H1',location:'app/(tabs)/log-meal.tsx:generateDescription',message:'Generating AI meal description',data:{mealType,hasImageUri:!!imageUri,hasImageUrl:!!imageUrl},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
-      console.log('[DBG_AI_DESC] generating description', { mealType });
-
       const res = await describeMeal(imageUri, mealType, imageUrl);
       setAiConfidence(res.confidence ?? null);
       if (!descriptionTouched) {
@@ -99,17 +91,7 @@ export default function LogMealScreen() {
         {
           text: 'OK',
           onPress: () => {
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'navctx-1',hypothesisId:'H1',location:'app/(tabs)/log-meal.tsx:handleSave',message:'About to router.replace to /(tabs)',data:{hasRouter:!!router},timestamp:Date.now()})}).catch(()=>{});
-            // #endregion
-            try {
-              router.replace('/(tabs)');
-            } catch (navErr: any) {
-              // #region agent log
-              fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'navctx-1',hypothesisId:'H1',location:'app/(tabs)/log-meal.tsx:handleSave',message:'router.replace threw',data:{errMessage:navErr?.message ?? String(navErr)},timestamp:Date.now()})}).catch(()=>{});
-              // #endregion
-              throw navErr;
-            }
+            router.replace('/(tabs)');
           },
         },
       ]);

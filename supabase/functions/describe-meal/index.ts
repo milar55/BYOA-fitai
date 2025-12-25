@@ -7,8 +7,8 @@
 //
 // Returns: { description: string, confidence: number }
 
-import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { encodeBase64 } from "https://deno.land/std@0.224.0/encoding/base64.ts";
+import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? Deno.env.get("GOOGLE_API_KEY");
 
@@ -16,6 +16,13 @@ function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
     headers: { "Content-Type": "application/json" },
+  });
+}
+
+function jsonWithHeaders(body: unknown, status = 200, headers: Record<string, string> = {}) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "Content-Type": "application/json", ...headers },
   });
 }
 
@@ -43,7 +50,11 @@ async function getImageBase64(input: { imageUrl?: string; imageBase64?: string }
 }
 
 serve(async (req) => {
+  const reqId = crypto.randomUUID();
+  const started = Date.now();
+
   if (!GEMINI_API_KEY) {
+    console.error("[describe-meal]", reqId, "Missing GEMINI_API_KEY secret");
     return json({ error: "Missing GEMINI_API_KEY secret" }, 500);
   }
 
@@ -52,8 +63,31 @@ serve(async (req) => {
   }
 
   try {
-    const { imageUrl, imageBase64, mealType } = await req.json();
-    const base64 = await getImageBase64({ imageUrl, imageBase64 });
+    let parsed: any;
+    try {
+      parsed = await req.json();
+    } catch (e) {
+      console.error("[describe-meal]", reqId, "Invalid JSON body");
+      return json({ error: "Invalid JSON body" }, 400);
+    }
+
+    const imageUrl = parsed?.imageUrl;
+    const imageBase64 = parsed?.imageBase64;
+    const mealType = parsed?.mealType;
+
+    console.log("[describe-meal]", reqId, "request", {
+      hasImageUrl: !!imageUrl,
+      hasImageBase64: !!imageBase64,
+      mealType: String(mealType ?? ""),
+    });
+
+    let base64: string;
+    try {
+      base64 = await getImageBase64({ imageUrl, imageBase64 });
+    } catch (e) {
+      console.error("[describe-meal]", reqId, "image fetch/encode failed", String(e?.message ?? e));
+      return json({ error: "Image fetch/encode failed", details: String(e?.message ?? e) }, 500);
+    }
 
     const prompt =
       `You are a nutrition-aware food recognition assistant specializing in South Asian cuisine (India, Pakistan, Bangladesh, Nepal).\n` +
@@ -95,7 +129,21 @@ serve(async (req) => {
 
     if (!geminiResp.ok) {
       const t = await geminiResp.text();
-      return json({ error: "Gemini request failed", details: t }, 500);
+      const trimmed = t.length > 1200 ? t.slice(0, 1200) + "…(truncated)" : t;
+      console.error("[describe-meal]", reqId, "Gemini request failed", {
+        status: geminiResp.status,
+        body: trimmed,
+      });
+      const retryAfter = geminiResp.headers.get("retry-after") ?? undefined;
+      const status = geminiResp.status;
+      const payload = { error: "Gemini request failed", status, details: trimmed };
+
+      // Preserve 429 for quota issues so the client can handle it gracefully.
+      if (status === 429) {
+        return jsonWithHeaders(payload, 429, retryAfter ? { "retry-after": retryAfter } : {});
+      }
+
+      return json(payload, 500);
     }
 
     const out = await geminiResp.json();
@@ -109,8 +157,10 @@ serve(async (req) => {
       return json({ description: text.slice(0, 400).trim(), confidence: 0.3 });
     }
 
+    console.log("[describe-meal]", reqId, "ok", { ms: Date.now() - started, confidence: result.confidence });
     return json(result);
   } catch (e) {
+    console.error("[describe-meal]", reqId, "Unhandled error", String(e?.message ?? e));
     return json({ error: String(e?.message ?? e) }, 500);
   }
 });

@@ -58,37 +58,19 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
-  let router: ReturnType<typeof useRouter>;
-  try {
-    router = useRouter();
-  } catch (e: any) {
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'navctx-2',hypothesisId:'H1',location:'app/_layout.tsx:useRouter',message:'useRouter threw in RootLayoutNav',data:{errMessage:e?.message ?? String(e)},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
-    console.error('[DBG_NAVCTX] useRouter threw in RootLayoutNav', e);
-    throw e;
-  }
+  const router = useRouter();
   const segments = useSegments();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('[DBG_AUTH_EVT]', { event, hasSession: !!session, seg0: segments[0] });
       const inAuthGroup = segments[0] === '(auth)';
 
       if (event === 'SIGNED_OUT') {
-        try {
-          router.replace('/(auth)/welcome');
-        } catch (e: any) {
-          console.error('[DBG_NAVCTX] router.replace threw (SIGNED_OUT)', e);
-        }
+        router.replace('/(auth)/welcome');
       } else if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
         if (session && inAuthGroup) {
           // Only redirect if they are currently in the auth screens
-          try {
-            router.replace('/(tabs)');
-          } catch (e: any) {
-            console.error('[DBG_NAVCTX] router.replace threw (SIGNED_IN/INITIAL_SESSION)', e);
-          }
+          router.replace('/(tabs)');
         }
       }
     });

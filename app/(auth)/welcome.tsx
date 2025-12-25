@@ -15,10 +15,7 @@ export default function WelcomeScreen() {
     <View
       className="flex-1 bg-white"
       onTouchStart={() => {
-        // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H1',location:'app/(auth)/welcome.tsx:root',message:'Root onTouchStart',data:{},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
-        console.log('[DBG_WELCOME] root onTouchStart');
+        // no-op
       }}
     >
       <StatusBar style="dark" />
@@ -61,10 +58,7 @@ export default function WelcomeScreen() {
         className="flex-1 p-8 justify-between"
         style={{ pointerEvents: 'box-none' }}
         onTouchStart={() => {
-          // #region agent log
-          fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H1',location:'app/(auth)/welcome.tsx:actionSection',message:'Action section onTouchStart',data:{},timestamp:Date.now()})}).catch(()=>{});
-          // #endregion
-          console.log('[DBG_WELCOME] action section onTouchStart');
+          // no-op
         }}
       >
         <Animated.View 
@@ -83,20 +77,14 @@ export default function WelcomeScreen() {
           entering={FadeInDown.delay(600).duration(800)}
           className="gap-y-4 mb-4"
           onStartShouldSetResponder={() => {
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H3',location:'app/(auth)/welcome.tsx:buttonsContainer',message:'buttons container startShouldSetResponder',data:{},timestamp:Date.now()})}).catch(()=>{});
-            // #endregion
-            console.log('[DBG_WELCOME] buttons container startShouldSetResponder');
+            // no-op
             return false;
           }}
         >
           <Button
             title="Get Started"
             onPress={() => {
-              // #region agent log
-              fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H4',location:'app/(auth)/welcome.tsx:getStarted',message:'Get Started handler called',data:{to:'/(auth)/signup'},timestamp:Date.now()})}).catch(()=>{});
-              // #endregion
-              console.log('[DBG_WELCOME] Get Started handler -> /(auth)/signup');
+              // no-op
               router.push('/(auth)/signup');
             }}
             className="w-full"
@@ -104,27 +92,18 @@ export default function WelcomeScreen() {
           <View
             style={{ pointerEvents: 'box-none' }}
             onStartShouldSetResponder={() => {
-              // #region agent log
-              fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H1',location:'app/(auth)/welcome.tsx:signInWrapper',message:'Sign In wrapper startShouldSetResponder',data:{},timestamp:Date.now()})}).catch(()=>{});
-              // #endregion
-              console.log('[DBG_WELCOME] Sign In wrapper startShouldSetResponder');
+              // no-op
               return false;
             }}
             onTouchStart={() => {
-              // #region agent log
-              fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H1',location:'app/(auth)/welcome.tsx:signInWrapper',message:'Sign In wrapper onTouchStart',data:{},timestamp:Date.now()})}).catch(()=>{});
-              // #endregion
-              console.log('[DBG_WELCOME] Sign In wrapper onTouchStart');
+              // no-op
             }}
           >
             <Button
               title="Sign In"
               variant="outline"
               onPress={() => {
-                // #region agent log
-                fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H4',location:'app/(auth)/welcome.tsx:signIn',message:'Sign In handler called',data:{to:'/(auth)/login'},timestamp:Date.now()})}).catch(()=>{});
-                // #endregion
-                console.log('[DBG_WELCOME] Sign In handler -> /(auth)/login');
+                // no-op
                 Alert.alert('Debug', 'Sign In onPress fired');
                 router.push('/(auth)/login');
               }}

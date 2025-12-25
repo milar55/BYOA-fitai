@@ -48,14 +48,11 @@ export const Button = ({
   return (
     <Pressable
       onPress={() => {
-        console.log(`[DBG_BUTTON] onPress title="${title}" variant="${variant}" disabled=${disabled} loading=${loading}`);
         onPress();
       }}
       onPressIn={() => {
-        console.log(`[DBG_BUTTON] onPressIn title="${title}" variant="${variant}"`);
       }}
       onPressOut={() => {
-        console.log(`[DBG_BUTTON] onPressOut title="${title}" variant="${variant}"`);
       }}
       disabled={disabled || loading}
       style={({ pressed }) => [

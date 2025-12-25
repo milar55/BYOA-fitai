@@ -103,9 +103,6 @@ export default function CameraTabScreen() {
       Vibration.vibrate(18);
       
       // Navigate to log-meal screen with the local URI and public URL
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'navctx-1',hypothesisId:'H1',location:'app/(tabs)/camera.tsx:upload',message:'About to router.push to log-meal',data:{hasRouter:!!router,hasUserId:!!userId,hasCapturedUri:!!capturedUri,hasPublicUrl:!!publicUrl,path:'/(tabs)/log-meal'},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       try {
         router.push({
           pathname: '/(tabs)/log-meal',
@@ -115,9 +112,6 @@ export default function CameraTabScreen() {
           },
         });
       } catch (navErr: any) {
-        // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/888a97b1-a21e-4044-bb22-43b641970785',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'navctx-1',hypothesisId:'H1',location:'app/(tabs)/camera.tsx:upload',message:'router.push threw',data:{errMessage:navErr?.message ?? String(navErr)},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
         throw navErr;
       }
     } catch (e: any) {
@@ -168,13 +162,7 @@ export default function CameraTabScreen() {
     <View
       className="flex-1 bg-black"
       onLayout={(e) => {
-        const { width, height } = e.nativeEvent.layout;
-        console.log('[DBG_CAMERA_LAYOUT] root onLayout', {
-          width,
-          height,
-          windowW: window.width,
-          windowH: window.height,
-        });
+        // no-op
       }}
     >
       <CameraView
@@ -186,8 +174,7 @@ export default function CameraTabScreen() {
         facing={facing}
         flash={flash}
         onLayout={(e) => {
-          const { width, height } = e.nativeEvent.layout;
-          console.log('[DBG_CAMERA_LAYOUT] CameraView onLayout', { width, height, facing, flash });
+          // no-op
         }}
       >
         {/* Top controls */}
