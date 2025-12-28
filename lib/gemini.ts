@@ -68,3 +68,49 @@ export async function describeMeal(
   }
 }
 
+/**
+ * Generates an AI nutrition analysis via a Supabase Edge Function.
+ */
+export async function analyzeNutrition(
+  imageUri: string,
+  imageUrl?: string
+): Promise<NutritionAnalysis> {
+  try {
+    const body: Record<string, unknown> = imageUrl
+      ? { imageUrl }
+      : { imageBase64: '__will_be_replaced__' };
+
+    if (!imageUrl) {
+      const base64 = await FileSystem.readAsStringAsync(imageUri, {
+        // @ts-expect-error legacy API supports string encoding
+        encoding: 'base64',
+      });
+      body.imageBase64 = base64;
+      delete body.imageUrl;
+    }
+
+    const { data, error } = await supabase.functions.invoke('analyze-nutrition', {
+      body,
+    });
+
+    if (error) {
+      const msg = String((error as any)?.message ?? '');
+      const isQuota =
+        msg.includes('429') ||
+        msg.toLowerCase().includes('resource_exhausted') ||
+        msg.toLowerCase().includes('quota');
+
+      if (isQuota) {
+        throw new Error('AI is temporarily rate-limited (quota exceeded). Please try again in a minute.');
+      }
+
+      console.error('Error invoking analyze-nutrition function:', error);
+      throw new Error('Failed to generate AI nutrition analysis. Please try again.');
+    }
+
+    return data as NutritionAnalysis;
+  } catch (error) {
+    console.error('analyzeNutrition error:', error);
+    throw error;
+  }
+}
