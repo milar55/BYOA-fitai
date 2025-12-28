@@ -1,11 +1,10 @@
-// Supabase Edge Function: describe-meal
-// Generates an AI meal description (no nutrition) from an uploaded photo.
+// Supabase Edge Function: analyze-nutrition
+// Generates an AI nutrition analysis from an uploaded photo.
 //
 // Expected body:
 // - imageUrl: string (public URL to the uploaded image) OR imageBase64: string
-// - mealType: string
 //
-// Returns: { description: string, confidence: number }
+// Returns: { description: string, calories: number, protein_g: number, carbs_g: number, fat_g: number, confidence: number }
 
 import { encodeBase64 } from "https://deno.land/std@0.224.0/encoding/base64.ts";
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
@@ -26,7 +25,14 @@ function jsonWithHeaders(body: unknown, status = 200, headers: Record<string, st
   });
 }
 
-function extractJson(text: string): { description: string; confidence: number } {
+function extractJson(text: string): {
+  description: string;
+  calories: number;
+  protein_g: number;
+  carbs_g: number;
+  fat_g: number;
+  confidence: number;
+} {
   // Try to find JSON block first
   const fenced = text.match(/```json\\s*([\\s\\S]*?)\\s*```/i);
   const raw = fenced?.[1] ?? text;
@@ -35,6 +41,10 @@ function extractJson(text: string): { description: string; confidence: number } 
   const parsed = JSON.parse(candidate);
   return {
     description: String(parsed.description ?? ""),
+    calories: Number(parsed.calories ?? 0),
+    protein_g: Number(parsed.protein_g ?? 0),
+    carbs_g: Number(parsed.carbs_g ?? 0),
+    fat_g: Number(parsed.fat_g ?? 0),
     confidence: Number(parsed.confidence ?? 0.5),
   };
 }
@@ -54,7 +64,7 @@ serve(async (req) => {
   const started = Date.now();
 
   if (!GEMINI_API_KEY) {
-    console.error("[describe-meal]", reqId, "Missing GEMINI_API_KEY secret");
+    console.error("[analyze-nutrition]", reqId, "Missing GEMINI_API_KEY secret");
     return json({ error: "Missing GEMINI_API_KEY secret" }, 500);
   }
 
@@ -67,36 +77,32 @@ serve(async (req) => {
     try {
       parsed = await req.json();
     } catch (e) {
-      console.error("[describe-meal]", reqId, "Invalid JSON body");
+      console.error("[analyze-nutrition]", reqId, "Invalid JSON body");
       return json({ error: "Invalid JSON body" }, 400);
     }
 
     const imageUrl = parsed?.imageUrl;
     const imageBase64 = parsed?.imageBase64;
-    const mealType = parsed?.mealType;
 
-    console.log("[describe-meal]", reqId, "request", {
+    console.log("[analyze-nutrition]", reqId, "request", {
       hasImageUrl: !!imageUrl,
       hasImageBase64: !!imageBase64,
-      mealType: String(mealType ?? ""),
     });
 
     let base64: string;
     try {
       base64 = await getImageBase64({ imageUrl, imageBase64 });
     } catch (e) {
-      console.error("[describe-meal]", reqId, "image fetch/encode failed", String(e?.message ?? e));
+      console.error("[analyze-nutrition]", reqId, "image fetch/encode failed", String(e?.message ?? e));
       return json({ error: "Image fetch/encode failed", details: String(e?.message ?? e) }, 500);
     }
 
     const prompt =
-      `You are a nutrition-aware food recognition assistant specializing in South Asian cuisine (India, Pakistan, Bangladesh, Nepal).\n` +
-      `Task: Write a short, vivid meal description (1-2 sentences) of what you see in the photo.\n` +
-      `Focus on dish names if recognizable (e.g., biryani, dal, curry, roti, naan, momo), plus key sides (raita, chutney).\n` +
-      `Include portion context (small/medium/large) if evident.\n` +
-      `Meal type context: ${String(mealType ?? "unknown")}.\n\n` +
+      `You are a nutrition expert specializing in South Asian cuisine (India, Pakistan, Bangladesh, Nepal).\n` +
+      `Task: Analyze the provided meal photo and estimate its nutritional content.\n` +
+      `Recognize dishes (e.g., biryani, dal, curry, roti, naan, momo) and estimate portion sizes.\n` +
       `Return ONLY valid JSON with this exact shape:\n` +
-      `{"description":"...","confidence":0.0}\n` +
+      `{"description":"...","calories":0,"protein_g":0,"carbs_g":0,"fat_g":0,"confidence":0.0}\n` +
       `Where confidence is 0.0-1.0.`;
 
     const payload = {
@@ -130,7 +136,7 @@ serve(async (req) => {
     if (!geminiResp.ok) {
       const t = await geminiResp.text();
       const trimmed = t.length > 1200 ? t.slice(0, 1200) + "…(truncated)" : t;
-      console.error("[describe-meal]", reqId, "Gemini request failed", {
+      console.error("[analyze-nutrition]", reqId, "Gemini request failed", {
         status: geminiResp.status,
         body: trimmed,
       });
@@ -154,15 +160,13 @@ serve(async (req) => {
     const result = extractJson(text);
     if (!result.description) {
       // Fallback to raw text if model didn't comply
-      return json({ description: text.slice(0, 400).trim(), confidence: 0.3 });
+      return json({ description: text.slice(0, 400).trim(), calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0, confidence: 0.3 });
     }
 
-    console.log("[describe-meal]", reqId, "ok", { ms: Date.now() - started, confidence: result.confidence });
+    console.log("[analyze-nutrition]", reqId, "ok", { ms: Date.now() - started, confidence: result.confidence });
     return json(result);
   } catch (e) {
-    console.error("[describe-meal]", reqId, "Unhandled error", String(e?.message ?? e));
+    console.error("[analyze-nutrition]", reqId, "Unhandled error", String(e?.message ?? e));
     return json({ error: String(e?.message ?? e) }, 500);
   }
 });
-
-

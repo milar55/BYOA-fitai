@@ -18,7 +18,7 @@ import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { MealTypePicker, getSmartDefaultMealType } from '@/components/meal/MealTypePicker';
-import { describeMeal } from '@/lib/gemini';
+import { describeMeal, analyzeNutrition, NutritionAnalysis } from '@/lib/gemini';
 import { supabase } from '@/lib/supabase';
 import { useAuthUser } from '@/hooks/useAuthUser';
 import { MealType } from '@/types/meal';
@@ -36,6 +36,7 @@ export default function LogMealScreen() {
   // Editable fields
   const [description, setDescription] = useState('');
   const [descriptionTouched, setDescriptionTouched] = useState(false);
+  const [nutrition, setNutrition] = useState<NutritionAnalysis | null>(null);
 
   const onSelectMealType = useCallback(
     (type: MealType) => {
@@ -44,18 +45,22 @@ export default function LogMealScreen() {
     [router]
   );
 
-  const generateDescription = useCallback(async () => {
+  const generateAiAnalysis = useCallback(async () => {
     if (!imageUri) return;
 
     setGenerating(true);
     try {
-      const res = await describeMeal(imageUri, mealType, imageUrl);
-      setAiConfidence(res.confidence ?? null);
+      const [descRes, nutritionRes] = await Promise.all([
+        describeMeal(imageUri, mealType, imageUrl),
+        analyzeNutrition(imageUri, imageUrl),
+      ]);
+      setAiConfidence(descRes.confidence ?? null);
       if (!descriptionTouched) {
-        setDescription(res.description ?? '');
+        setDescription(descRes.description ?? '');
       }
+      setNutrition(nutritionRes);
     } catch (e: any) {
-      Alert.alert('AI description failed', e?.message ?? 'Could not generate an AI meal description.');
+      Alert.alert('AI analysis failed', e?.message ?? 'Could not generate an AI meal analysis.');
     } finally {
       setGenerating(false);
     }
@@ -63,7 +68,7 @@ export default function LogMealScreen() {
 
   useEffect(() => {
     // Generate immediately after upload → when this screen mounts.
-    void generateDescription();
+    void generateAiAnalysis();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -77,11 +82,10 @@ export default function LogMealScreen() {
         image_url: imageUrl,
         meal_type: mealType,
         description: description,
-        // Nutrition not implemented yet; keep schema satisfied with zeros for now.
-        calories: 0,
-        protein_g: 0,
-        carbs_g: 0,
-        fat_g: 0,
+        calories: nutrition?.calories ?? 0,
+        protein_g: nutrition?.protein ?? 0,
+        carbs_g: nutrition?.carbs ?? 0,
+        fat_g: nutrition?.fat ?? 0,
         confidence_score: aiConfidence ?? 0.5,
       });
 
@@ -165,12 +169,39 @@ export default function LogMealScreen() {
                 )}
               </View>
 
+              {nutrition && (
+                <View className="bg-cardamomCream/50 p-4 rounded-3xl border border-saffron/20 mb-6">
+                  <View className="flex-row items-center mb-2">
+                    <MaterialCommunityIcons name="chart-bar" size={20} color="#FF9933" />
+                    <Text className="text-deepTeal font-poppins-bold ml-2">Nutrition Analysis</Text>
+                  </View>
+                  <View className="flex-row justify-around mt-2">
+                    <View className="items-center">
+                      <Text className="text-deepTeal font-poppins-bold text-lg">{nutrition.calories}</Text>
+                      <Text className="text-deepTeal/50 font-inter text-xs">Calories</Text>
+                    </View>
+                    <View className="items-center">
+                      <Text className="text-deepTeal font-poppins-bold text-lg">{nutrition.protein}g</Text>
+                      <Text className="text-deepTeal/50 font-inter text-xs">Protein</Text>
+                    </View>
+                    <View className="items-center">
+                      <Text className="text-deepTeal font-poppins-bold text-lg">{nutrition.carbs}g</Text>
+                      <Text className="text-deepTeal/50 font-inter text-xs">Carbs</Text>
+                    </View>
+                    <View className="items-center">
+                      <Text className="text-deepTeal font-poppins-bold text-lg">{nutrition.fat}g</Text>
+                      <Text className="text-deepTeal/50 font-inter text-xs">Fat</Text>
+                    </View>
+                  </View>
+                </View>
+              )}
+
               <Button
-                title={descriptionTouched ? 'Re-generate description (overwrites)' : 'Re-generate description'}
+                title={descriptionTouched ? 'Re-generate analysis (overwrites)' : 'Re-generate analysis'}
                 variant="outline"
                 onPress={() => {
                   setDescriptionTouched(false);
-                  void generateDescription();
+                  void generateAiAnalysis();
                 }}
               />
 
